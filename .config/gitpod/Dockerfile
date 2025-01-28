@@ -63,7 +63,7 @@ ARG NPM_VERSION=11.0.0
 # renovate: datasource=npm depName=ungit
 ARG UNGIT_VERSION=1.5.28
 # renovate: datasource=npm depName=mega-linter-runner
-ARG MEGA_LINTER_RUNNER_VERSION=8.3.0
+ARG MEGA_LINTER_RUNNER_VERSION=8.4.1
 # renovate: datasource=npm depName=markdown-table-formatter
 ARG MARKDOWN_TABLE_FORMATTER_VERSION=1.6.1
 
@@ -97,7 +97,7 @@ USER gitpod
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # renovate: datasource=github-releases depName=astral-sh/uv
-ARG UV_VERSION=0.5.15
+ARG UV_VERSION=0.5.22
 # hadolint ignore=SC1090,SC1091
 RUN curl -LsSf "https://astral.sh/uv/${UV_VERSION}/install.sh" | sh \
     && source "$HOME/.local/bin/env"
