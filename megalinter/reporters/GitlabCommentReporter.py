@@ -19,14 +19,9 @@ class GitlabCommentReporter(Reporter):
     gitlab_server_url = "https://gitlab.com"
 
     def manage_activation(self):
-        if (
-            not config.exists(self.master.request_id, "CI_JOB_TOKEN")
-            and not config.exists(
-                self.master.request_id, "GITLAB_ACCESS_TOKEN_MEGALINTER"
-            )
-        ):
+        if not config.exists(self.master.request_id, "CI_JOB_TOKEN"):
             self.is_active = False
-        elif (
+        if (
             config.get(self.master.request_id, "GITLAB_COMMENT_REPORTER", "true")
             != "true"
         ):
@@ -59,13 +54,7 @@ class GitlabCommentReporter(Reporter):
 
     def produce_report(self):
         # Post comment on Gitlab pull request
-        if (
-            config.get(self.master.request_id, "CI_JOB_TOKEN", "") != ""
-            or config.get(
-                self.master.request_id, "GITLAB_ACCESS_TOKEN_MEGALINTER", ""
-            )
-            != ""
-        ):
+        if config.get(self.master.request_id, "CI_JOB_TOKEN", "") != "":
             gitlab_repo = config.get(self.master.request_id, "CI_PROJECT_NAME")
             gitlab_project_id = config.get(self.master.request_id, "CI_PROJECT_ID")
             gitlab_merge_request_id = config.get(
@@ -241,9 +230,7 @@ class GitlabCommentReporter(Reporter):
         # Not in gitlab context
         else:
             logging.debug(
-                "[Gitlab Comment Reporter] No Gitlab Token found "
-                "(CI_JOB_TOKEN or GITLAB_ACCESS_TOKEN_MEGALINTER), "
-                "so skipped post of MR comment"
+                "[Gitlab Comment Reporter] No Gitlab Token found, so skipped post of MR comment"
             )
 
     def display_auth_error(self, e):
