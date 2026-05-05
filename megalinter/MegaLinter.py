@@ -30,6 +30,7 @@ from megalinter.constants import (
     ML_DOC_URL,
 )
 from megalinter.logger import display_header, initialize_logger, manage_upgrade_message
+from megalinter.reporters.jenkins_ci_vars import apply_jenkins_ci_vars
 from megalinter.utils_reporter import log_section_end, log_section_start
 from multiprocessing_logging import install_mp_handler, uninstall_mp_handler
 
@@ -95,6 +96,9 @@ class Megalinter:
         self.workspace = self.get_workspace(params)
         # Do not send secrets to linter executables
         config.init_config(self.request_id, self.workspace, params)
+
+        # Map Jenkins CI env vars to native platform vars for comment reporters
+        apply_jenkins_ci_vars(self.request_id)
 
         # Guess who's there ? :)
         if self.cli is True:
