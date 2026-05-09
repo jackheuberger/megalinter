@@ -11,18 +11,17 @@ Note: Can be used with `oxsecurity/megalinter@beta` in your GitHub Action mega-l
 - Core
   - Security: add [more default hidden environment variables](https://megalinter.io/beta/config-variables-security/), so in case one of the 100+ linters is hacked, the attacker won't get your secrets anyway
   - Upgrade GO version to 1.26.2
-  - Enable comment reporters (GitHub, GitLab, Azure DevOps, Bitbucket) when running MegaLinter from Jenkins CI
-  - Fix: use `config.get()` instead of `os.environ.get()` for `GITHUB_REF` in GithubCommentReporter
-  - GitlabCommentReporter now activates when `GITLAB_ACCESS_TOKEN_MEGALINTER` is set (no longer requires `CI_JOB_TOKEN`)
 
 - New linters
   - osv-scanner (trivy-like security linter, by Google)
   - Add [zizmor](https://docs.zizmor.sh/) GitHub Actions static analysis.
 
 - Disabled linters
-  - Disable trivy until their security issue is solved
   - Disable KICS until their security issue is solved
   - Disable spectral which is crashing
+
+- Re-enabled linters
+  - Re-enable trivy (v0.70.0) now that the supply chain security incident (GHSA-69fq-xp46-6x23) is resolved
 
 - Deprecated linters
 
@@ -39,6 +38,9 @@ Note: Can be used with `oxsecurity/megalinter@beta` in your GitHub Action mega-l
   - Produce linter console reports sequentially in main process for parallel runs to avoid interleaved CI log sections
 
 - Reporters
+  - Enable comment reporters (GitHub, GitLab, Azure DevOps, Bitbucket) when running MegaLinter from Jenkins CI
+  - Fix: use `config.get()` instead of `os.environ.get()` for `GITHUB_REF` in GithubCommentReporter
+  - GitlabCommentReporter now activates when `GITLAB_ACCESS_TOKEN_MEGALINTER` is set (no longer requires `CI_JOB_TOKEN`)
 
 - Flavors
 
@@ -47,8 +49,20 @@ Note: Can be used with `oxsecurity/megalinter@beta` in your GitHub Action mega-l
   - Add documentation for [megalinter-ado](https://github.com/DownAtTheBottomOfTheMoleHole/megalinter-ado) Azure DevOps extension
   - Add documentation for [megalinter-mcp-server](https://github.com/DownAtTheBottomOfTheMoleHole/megalinter-mcp) MCP server
 
+- Dev
+  - Add CLAUDE.md and list of skills to help working on MegaLinter using Coding Agents (Claude Code, Github Copilot, Codex, Gemini-cli...)
+    - `/add-linter [name]` - Guided workflow for adding a new linter
+    - `/update-linter-version [linter] [version]` - Update a linter's pinned version
+    - `/review-descriptor [name]` - Audit a descriptor YAML for completeness
+    - `/fix-linter-test [name]` - Debug a failing linter test
+    - `/add-reporter [name]` - Add a new output reporter
+    - `/add-flavor [name]` - Add a new Docker flavor
+    - `/build` - Run the build system
+    - `/diagnose-config` - Debug `.mega-linter.yml` configuration issues
+    - `/fix-security-issue [CVE or description]` - Handle CVE/vulnerability reports from trivy, osv-scanner, etc.
+
 - CI
-  - Disable trivy-action until their security issue is solved
+  - Re-enable trivy-action (v0.36.0) now that the supply chain security incident is resolved
   - Run ARM linter jobs only if the latest commit message contains "ARM" (to avoid 200 jobs for each PR)
   - Prevent MegaLinter to push a new commit if the only updates are on markdown files
   - Activate osv-scanner on own sources
