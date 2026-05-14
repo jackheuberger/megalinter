@@ -131,6 +131,9 @@ class Linter:
         )  # Arguments from config, defined in <LINTER_KEY>_ARGUMENTS variable
         # Extra arguments to send to cli everytime, just before file argument
         self.cli_lint_extra_args_after = []
+        self.cli_lint_mode_file_extra_args_after = []
+        self.cli_lint_mode_list_of_files_extra_args_after = []
+        self.cli_lint_mode_project_extra_args_after = []
         self.cli_lint_errors_count = None
         self.cli_lint_errors_regex = None
         self.cli_lint_warnings_count = None
@@ -1483,6 +1486,25 @@ class Linter:
             self.cli_lint_extra_args_after, additional_replace_variables
         )
         cmd += self.cli_lint_extra_args_after
+
+        if self.cli_lint_mode == "file":
+            self.cli_lint_mode_file_extra_args_after = self.replace_vars(
+                self.cli_lint_mode_file_extra_args_after,
+            )
+
+            cmd += self.cli_lint_mode_file_extra_args_after
+        elif self.cli_lint_mode == "list_of_files":
+            self.cli_lint_mode_list_of_files_extra_args_after = self.replace_vars(
+                self.cli_lint_mode_list_of_files_extra_args_after,
+            )
+
+            cmd += self.cli_lint_mode_list_of_files_extra_args_after
+        elif self.cli_lint_mode == "project":
+            self.cli_lint_mode_project_extra_args_after = self.replace_vars(
+                self.cli_lint_mode_project_extra_args_after,
+            )
+
+            cmd += self.cli_lint_mode_project_extra_args_after
 
         # Some linters/formatters update files by default.
         # To avoid that, declare -megalinter-fix-flag as cli_lint_fix_arg_name
