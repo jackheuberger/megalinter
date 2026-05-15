@@ -1439,6 +1439,7 @@
         "sbatch",
         "sbom",
         "scalac",
+        "scalacenter",
         "scalafix",
         "scandir",
         "scattergather",
