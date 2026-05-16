@@ -25,6 +25,38 @@ description: How to use eslint (configure, ignore files, ignore errors, help & v
 
 ESLint requires a custom configuration file applicable to your project. You can create it by typing `npx eslint --init` in the root of your repository
 
+### ESLint v10 — resolving bare imports from `eslint.config.mjs`
+
+ESLint v10 dropped support for the legacy `.eslintrc.*` format and only loads the new flat config (`eslint.config.*`). When MegaLinter runs ESLint from its own container install (`/node-deps/node_modules`) instead of your project's local `node_modules`, Node's ESM resolver may fail to locate bare imports such as `import js from '@eslint/js'` (upstream limitation tracked in [eslint/eslint#18465](https://github.com/eslint/eslint/issues/18465)), producing errors like:
+
+```text
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@eslint/js' imported from /github/workspace/eslint.config.mjs
+```
+
+Two recommended workarounds:
+
+1. **Use `createRequire` in `eslint.config.mjs`** so bare imports fall back to CommonJS resolution (which honors `NODE_PATH` and will pick up MegaLinter's bundled `@eslint/js`, `@typescript-eslint/eslint-plugin`, etc.):
+
+    ```js
+    import { createRequire } from 'module';
+    const require = createRequire(import.meta.url);
+    const js = require('@eslint/js');
+    const tsPlugin = require('@typescript-eslint/eslint-plugin');
+    const reactPlugin = require('@eslint-react/eslint-plugin');
+    ```
+
+2. **Install your project's dependencies in a pre-command and point MegaLinter at the project-local ESLint binary**, so ESLint runs from `<workspace>/node_modules` and resolves your config's imports naturally:
+
+    ```yaml
+    TSX_ESLINT_PRE_COMMANDS:
+      - command: yarn install --frozen-lockfile --ignore-scripts
+        cwd: workspace
+        continue_if_failed: false
+    TSX_ESLINT_CLI_EXECUTABLE: node_modules/.bin/eslint
+    ```
+
+    Replace `yarn install --frozen-lockfile --ignore-scripts` with `npm ci` (or `npm install --include=dev`) if your project uses npm.
+
 ## eslint documentation
 
 - Version in MegaLinter: **10.3.0**
@@ -38,10 +70,10 @@ ESLint requires a custom configuration file applicable to your project. You can 
 
 ## Configuration in MegaLinter
 
-- Enable eslint by adding `TSX_ESLINT` in [ENABLE_LINTERS variable](https://megalinter.io/beta/configuration/#activation-and-deactivation)
-- Disable eslint by adding `TSX_ESLINT` in [DISABLE_LINTERS variable](https://megalinter.io/beta/configuration/#activation-and-deactivation)
+- Enable eslint by adding `TSX_ESLINT` in [ENABLE_LINTERS variable](https://megalinter.io/9.5.0/configuration/#activation-and-deactivation)
+- Disable eslint by adding `TSX_ESLINT` in [DISABLE_LINTERS variable](https://megalinter.io/9.5.0/configuration/#activation-and-deactivation)
 
-- Enable **autofixes** by adding `TSX_ESLINT` in [APPLY_FIXES variable](https://megalinter.io/beta/configuration/#apply-fixes)
+- Enable **autofixes** by adding `TSX_ESLINT` in [APPLY_FIXES variable](https://megalinter.io/9.5.0/configuration/#apply-fixes)
 
 | Variable                               | Description                                                                                                                                                                                                         | Default value                                   |
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|
@@ -80,12 +112,12 @@ Use eslint in your favorite IDE to catch errors before MegaLinter !
 
 This linter is available in the following flavors
 
-|                                                                         <!-- -->                                                                         | Flavor                                                       | Description                                              | Embedded linters |                                                                                                                                                                                             Info |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------|:---------------------------------------------------------|:----------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/images/mega-linter-square.png" alt="" height="32px" class="megalinter-icon"></a> | [all](https://megalinter.io/beta/supported-linters/)         | Default MegaLinter Flavor                                |       136        |                       ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter) |
-|       <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/cupcake.ico" alt="" height="32px" class="megalinter-icon"></a>       | [cupcake](https://megalinter.io/beta/flavors/cupcake/)       | MegaLinter for the most commonly used languages          |        92        |       ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-cupcake/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-cupcake) |
-|      <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/dotnetweb.ico" alt="" height="32px" class="megalinter-icon"></a>      | [dotnetweb](https://megalinter.io/beta/flavors/dotnetweb/)   | Optimized for C, C++, C# or VB based projects with JS/TS |        76        |   ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-dotnetweb/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-dotnetweb) |
-|     <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/javascript.ico" alt="" height="32px" class="megalinter-icon"></a>      | [javascript](https://megalinter.io/beta/flavors/javascript/) | Optimized for JAVASCRIPT or TYPESCRIPT based projects    |        62        | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-javascript/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-javascript) |
+|                                                                         <!-- -->                                                                         | Flavor                                                        | Description                                              | Embedded linters |                                                                                                                                                                                               Info |
+|:--------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------|:---------------------------------------------------------|:----------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/images/mega-linter-square.png" alt="" height="32px" class="megalinter-icon"></a> | [all](https://megalinter.io/9.5.0/supported-linters/)         | Default MegaLinter Flavor                                |       136        |                       ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter/v9.5.0) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter) |
+|       <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/cupcake.ico" alt="" height="32px" class="megalinter-icon"></a>       | [cupcake](https://megalinter.io/9.5.0/flavors/cupcake/)       | MegaLinter for the most commonly used languages          |        92        |       ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-cupcake/v9.5.0) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-cupcake) |
+|      <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/dotnetweb.ico" alt="" height="32px" class="megalinter-icon"></a>      | [dotnetweb](https://megalinter.io/9.5.0/flavors/dotnetweb/)   | Optimized for C, C++, C# or VB based projects with JS/TS |        76        |   ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-dotnetweb/v9.5.0) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-dotnetweb) |
+|     <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/javascript.ico" alt="" height="32px" class="megalinter-icon"></a>      | [javascript](https://megalinter.io/9.5.0/flavors/javascript/) | Optimized for JAVASCRIPT or TYPESCRIPT based projects    |        62        | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-javascript/v9.5.0) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-javascript) |
 
 ## Behind the scenes
 
